@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>Tagzi</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="brand-icon" style="width:52px;height:52px;border-radius:16px;">
+      <svg viewBox="0 0 24 24" style="width:26px;height:26px;"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24H4a1 1 0 0 0-1 1v5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.59-4.59a2 2 0 0 0 0-2.83Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="7.5" r="1.25" stroke-width="2"/></svg>
+    </div>
+
+    <!-- STEP 1: email -->
+    <div class="login-step" id="loginStepEmail">
+      <h1>Welcome to Tagzi</h1>
+      <p>Enter your email and we'll send you a login code.</p>
+      <input id="loginEmailInput" type="email" placeholder="you@example.com" autocomplete="email" />
+      <div class="login-error" id="emailError" hidden></div>
+      <button id="sendCodeBtn">Send Code</button>
+      <div class="login-note">No password needed — we'll email you a one-time code.</div>
+    </div>
+
+    <!-- STEP 2: verification code -->
+    <div class="login-step" id="loginStepCode" hidden>
+      <h1>Check your email</h1>
+      <p>Enter the 6-digit code we sent to <strong id="codeSentTo"></strong>.</p>
+      <input id="loginCodeInput" type="text" inputmode="numeric" maxlength="6" placeholder="123456" class="code-input" autocomplete="one-time-code" />
+      <div class="login-error" id="codeError" hidden></div>
+      <button id="verifyCodeBtn">Verify &amp; Log In</button>
+      <div class="login-links">
+        <button type="button" class="link-btn" id="resendCodeBtn">Resend code</button>
+        <span>·</span>
+        <button type="button" class="link-btn" id="changeEmailBtn">Use a different email</button>
+      </div>
+      <div class="test-mode-banner" id="testModeBanner" hidden></div>
+    </div>
+
+    <!-- STEP 3: business name (first-time accounts only) -->
+    <div class="login-step" id="loginStepBusiness" hidden>
+      <h1>What's your business called?</h1>
+      <p>This shows up in your sidebar. You can change it later.</p>
+      <input id="loginBusinessInput" type="text" placeholder="e.g. Mshultzliquidation" />
+      <button id="finishSetupBtn">Continue</button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24H4a1 1 0 0 0-1 1v5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.59-4.59a2 2 0 0 0 0-2.83Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="7.5" r="1.25" stroke-width="2"/></svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-name">Tagzi</div>
+          <div class="brand-org" id="orgName">Business</div>
+        </div>
+      </div>
+      <button class="collapse-btn" id="collapseBtn" title="Collapse sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3v18M15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10M9 8l-3 4 3 4"/></svg>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="section-label">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 8H3v13h18V8ZM1 3h22v5H1V3ZM10 12h4"/></svg>
+        PAST DAYS
+      </div>
+      <div class="past-days-list" id="pastDaysList">
+        <div class="empty-note">No past days yet.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <button class="sidebar-link" id="howToUseBtn">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        How to use
+      </button>
+      <button class="sidebar-link" id="logoutBtn">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Log out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <button class="open-sidebar-btn" id="openSidebarBtn" title="Show sidebar" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3v18M15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10M15 8l3 4-3 4"/></svg>
+    </button>
+    <header class="page-header">
+      <div class="header-left">
+        <h1>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3ZM19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14Z"/></svg>
+          Today
+        </h1>
+        <div class="date-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <span id="todayDate"></span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="header-btn" id="saveListBtn" title="Save the current categories as a list">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+          Save List
+        </button>
+        <div class="saved-lists-wrap">
+          <button class="header-btn" id="savedListsBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            Saved Lists
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="saved-lists-menu" id="savedListsMenu" hidden>
+            <div class="saved-lists-empty" id="savedListsEmpty">No saved lists yet. Set up your categories, then click Save List.</div>
+            <div id="savedListsItems"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="category-grid" id="categoryGrid"></section>
+
+    <section class="add-category-card">
+      <label for="newCategoryInput">Add a new category</label>
+      <div class="add-row">
+        <input id="newCategoryInput" type="text" placeholder="e.g. Electronics" maxlength="40" />
+        <button id="addCategoryBtn">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M12 5v14M5 12h14"/></svg>
+          Add
+        </button>
+      </div>
+    </section>
+
+    <div class="history-toggle-row">
+      <button id="toggleHistoryBtn">Show today's history ▾</button>
+    </div>
+    <section class="history-panel" id="historyPanel" hidden></section>
+
+    <div class="reset-day-row">
+      <button id="resetDayBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
+        Reset Day
+      </button>
+      <button id="deleteAllBtn" class="delete-all-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
+        Delete All
+      </button>
+    </div>
+  </main>
+</div>
+
+<!-- HOW TO USE MODAL -->
+<div class="modal-overlay" id="howToModal" hidden>
+  <div class="modal">
+    <div class="modal-header">
+      <h2>
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        How to use Tagzi
+      </h2>
+      <button class="close-btn" id="closeHowTo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <h3>🏷️ What is Tagzi?</h3>
+      <p>Tagzi helps you print numbered labels for your live sales or auctions. Add a category (for example, a buyer's username, item type, or weight), then click it to print one label with the next sold number.</p>
+
+      <h3>🖨️ Label size</h3>
+      <ul>
+        <li>Each label is <strong>1.5 inches wide × 0.5 inches tall</strong> (38mm × 13mm).</li>
+        <li>Designed for thermal label printers, sticker sheets, or any small-format roll printer.</li>
+        <li>In your browser's print dialog, set paper size to match your label stock and use <strong>0 margins</strong>. Turn off headers and footers for the cleanest result.</li>
+      </ul>
+
+      <h3>✅ Printing labels</h3>
+      <ol>
+        <li>Type a category name in the <em>Add category</em> box and press Enter.</li>
+        <li>Click any category card to print the next label (each click prints one label and adds 1 to that category's count).</li>
+        <li>The print dialog opens automatically. After you print or cancel, it closes itself — there is no extra screen to dismiss.</li>
+      </ol>
+
+      <h3>↺ Reprints & counters</h3>
+      <ul>
+        <li>Use the <em>Today's history</em> list to reprint a past label. Reprints do not change the count.</li>
+        <li>The small reset arrow on a category resets just that category's counter back to 0.</li>
+        <li><em>Reset Day</em> archives the day and clears all counts so you can start fresh.</li>
+      </ul>
+
+      <h3>🗄️ Past days & exports</h3>
+      <ul>
+        <li>Each day you reset is saved in <em>Past Days</em> on the left sidebar (or below on mobile).</li>
+        <li>Click a past day to view its history, reprint old labels, or download CSV files of the print history and category totals.</li>
+        <li>Use the trash icon to permanently delete an old day. You'll be asked to confirm before anything is removed.</li>
+      </ul>
+
+      <h3>✨ Tips</h3>
+      <ul>
+        <li>Your data is saved to your account, so you can log in from any device and pick up where you left off.</li>
+        <li>Each category gets its own color automatically — no setup needed.</li>
+        <li>For best speed during a live show, keep the same browser tab open and your printer ready before you start.</li>
+        <li>Use <em>Save List</em> (top right) to save your current set of categories by name, then reload them anytime from the <em>Saved Lists</em> dropdown — handy for switching between different label setups.</li>
+      </ul>
+    </div>
+    <div class="modal-footer">
+      <button id="gotItBtn">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAST DAY MODAL -->
+<div class="modal-overlay" id="pastDayModal" hidden>
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="pastDayTitle">Past Day</h2>
+      <button class="close-btn" id="closePastDay">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="pd-summary" id="pdSummary"></div>
+      <div class="pd-actions">
+        <button id="pdExportHistory">⬇ Download print history CSV</button>
+        <button id="pdExportTotals">⬇ Download category totals CSV</button>
+        <button id="pdDeleteDay">🗑 Delete this day</button>
+      </div>
+      <div id="pdHistoryList"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="pdCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL (custom, replaces native confirm() which some embedded previews block) -->
+<div class="modal-overlay" id="confirmModal" hidden>
+  <div class="modal modal-small">
+    <div class="modal-header">
+      <h2 id="confirmTitle">Are you sure?</h2>
+      <button class="close-btn" id="confirmCloseX">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmMessage" style="margin:0;"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-secondary-btn" id="confirmCancelBtn">Cancel</button>
+      <button id="confirmOkBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROMPT MODAL (custom, replaces native prompt()) -->
+<div class="modal-overlay" id="promptModal" hidden>
+  <div class="modal modal-small">
+    <div class="modal-header">
+      <h2 id="promptTitle">Name it</h2>
+      <button class="close-btn" id="promptCloseX">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <label id="promptLabel" for="promptInput">Name</label>
+      <input type="text" id="promptInput" autocomplete="off" />
+    </div>
+    <div class="modal-footer">
+      <button class="modal-secondary-btn" id="promptCancelBtn">Cancel</button>
+      <button id="promptOkBtn">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT AREA -->
+<div id="printArea"></div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

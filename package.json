@@ -1,0 +1,9 @@
+{
+  "name": "tagzi",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Tagzi label printing app, with a Vercel serverless backend for email login codes.",
+  "engines": {
+    "node": ">=18"
+  }
+}
