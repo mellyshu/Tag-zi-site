@@ -213,7 +213,6 @@ const loginOverlay = document.getElementById('loginOverlay');
 
 const loginStepEmail = document.getElementById('loginStepEmail');
 const loginStepCode = document.getElementById('loginStepCode');
-const loginStepBusiness = document.getElementById('loginStepBusiness');
 
 const loginEmailInput = document.getElementById('loginEmailInput');
 const sendCodeBtn = document.getElementById('sendCodeBtn');
@@ -226,9 +225,6 @@ const codeSentTo = document.getElementById('codeSentTo');
 const resendCodeBtn = document.getElementById('resendCodeBtn');
 const changeEmailBtn = document.getElementById('changeEmailBtn');
 const testModeBanner = document.getElementById('testModeBanner');
-
-const loginBusinessInput = document.getElementById('loginBusinessInput');
-const finishSetupBtn = document.getElementById('finishSetupBtn');
 
 let pendingEmail = null;
 let pendingCode = null;       // set only in local "test mode" fallback (no backend reachable)
@@ -244,7 +240,7 @@ function generateCode() {
 }
 
 function showLoginStep(step) {
-  [loginStepEmail, loginStepCode, loginStepBusiness].forEach(s => s.hidden = (s !== step));
+  [loginStepEmail, loginStepCode].forEach(s => s.hidden = (s !== step));
 }
 
 function enterTestModeCode(email) {
@@ -370,25 +366,11 @@ async function verifyCode() {
   }
 
   verifyCodeBtn.disabled = false;
-  if (accountExists(pendingEmail)) {
-    completeLogin(pendingEmail);
-  } else {
-    showLoginStep(loginStepBusiness);
-    loginBusinessInput.value = '';
-    loginBusinessInput.focus();
-  }
+  completeLogin(pendingEmail);
 }
 
 verifyCodeBtn.addEventListener('click', verifyCode);
 loginCodeInput.addEventListener('keydown', e => { if (e.key === 'Enter') verifyCode(); });
-
-function finishSetup() {
-  const name = loginBusinessInput.value.trim();
-  completeLogin(pendingEmail, name || pendingEmail);
-}
-
-finishSetupBtn.addEventListener('click', finishSetup);
-loginBusinessInput.addEventListener('keydown', e => { if (e.key === 'Enter') finishSetup(); });
 
 function completeLogin(email, businessName) {
   load(email);
