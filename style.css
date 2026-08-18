@@ -483,19 +483,23 @@ body{
   }
   .print-label{
     width:1.5in;height:0.5in;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    display:flex;flex-direction:row;align-items:baseline;justify-content:center;
     font-family:Arial,Helvetica,sans-serif;
     padding:0.03in 0.06in;
     box-sizing:border-box;
     text-align:center;
+    white-space:nowrap;overflow:hidden;
+    gap:0.05in;
   }
   .print-label .pl-cat{
-    font-size:9.5pt;font-weight:800;text-transform:uppercase;
-    letter-spacing:.02em;line-height:1.05;
-    max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+    font-size:11pt;font-weight:800;text-transform:uppercase;
+    letter-spacing:.02em;line-height:1;
+    overflow:hidden;text-overflow:ellipsis;
+    min-width:0;
   }
   .print-label .pl-num{
-    font-size:15pt;font-weight:800;line-height:1.1;margin-top:1px;
+    font-size:13pt;font-weight:800;line-height:1;
+    flex-shrink:0;
   }
 }
 
