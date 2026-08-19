@@ -116,12 +116,12 @@ function load(email) {
   save();
 }
 
-function toast(msg) {
+function toast(msg, duration) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => el.classList.remove('show'), 1800);
+  toast._t = setTimeout(() => el.classList.remove('show'), duration || 1800);
 }
 
 /* ---------------- custom confirm / prompt modals ----------------
@@ -892,7 +892,63 @@ document.getElementById('howToUseBtn').addEventListener('click', () => howToModa
 document.getElementById('closeHowTo').addEventListener('click', () => howToModal.hidden = true);
 document.getElementById('gotItBtn').addEventListener('click', () => howToModal.hidden = true);
 
-[howToModal, pastDayModal].forEach(m => {
+/* ---------------- contact us modal ---------------- */
+const contactModal = document.getElementById('contactModal');
+const contactMessageInput = document.getElementById('contactMessageInput');
+const contactError = document.getElementById('contactError');
+const contactSendBtn = document.getElementById('contactSendBtn');
+
+function openContactModal() {
+  contactMessageInput.value = '';
+  contactError.hidden = true;
+  contactModal.hidden = false;
+  setTimeout(() => contactMessageInput.focus(), 30);
+}
+function closeContactModal() { contactModal.hidden = true; }
+
+document.getElementById('contactUsBtn').addEventListener('click', openContactModal);
+document.getElementById('closeContact').addEventListener('click', closeContactModal);
+document.getElementById('contactCancelBtn').addEventListener('click', closeContactModal);
+
+async function sendContactMessage() {
+  const message = contactMessageInput.value.trim();
+  contactError.hidden = true;
+  if (!message) {
+    contactError.textContent = 'Please describe your issue before sending.';
+    contactError.hidden = false;
+    return;
+  }
+
+  contactSendBtn.disabled = true;
+  const originalLabel = contactSendBtn.textContent;
+  contactSendBtn.textContent = 'Sending…';
+
+  try {
+    const resp = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, fromEmail: state.org })
+    });
+    if (resp.ok) {
+      closeContactModal();
+      toast("Message sent — we'll get back to you shortly", 3200);
+    } else {
+      const data = await resp.json().catch(() => ({}));
+      contactError.textContent = data.error || 'Could not send your message right now. Please try again.';
+      contactError.hidden = false;
+    }
+  } catch (err) {
+    contactError.textContent = 'Could not reach the server. Please check your connection and try again.';
+    contactError.hidden = false;
+  }
+
+  contactSendBtn.disabled = false;
+  contactSendBtn.textContent = originalLabel;
+}
+
+contactSendBtn.addEventListener('click', sendContactMessage);
+
+[howToModal, pastDayModal, contactModal].forEach(m => {
   m.addEventListener('click', (e) => { if (e.target === m) m.hidden = true; });
 });
 
