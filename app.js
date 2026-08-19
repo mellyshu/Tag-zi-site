@@ -644,12 +644,51 @@ async function loadPreset(id) {
 /* ---------------- printing ---------------- */
 const printArea = document.getElementById('printArea');
 
+/* Figures out how big the category name / number text can be so the whole
+   thing always fits on one line within the physical label, no matter how
+   long the category name is. Measured with a hidden canvas (fast, and works
+   even before the print area is visible) using the same 96px-per-inch ratio
+   the browser uses when laying out an @page in print. */
+function fitLabelFontSizes(catName, numText) {
+  const PAGE_WIDTH_PX = 144;   // 1.5in label width at 96px/in
+  const PAD_PX = 9.6;          // matches the 0.1in left/right padding in CSS
+  const GAP_PX = 6.7;          // matches the 0.07in gap between name and number
+  const MAX_CAT = 19, MIN_CAT = 7.5;
+  const MAX_NUM = 23, MIN_NUM = 10;
+  const SIZE_RATIO = MAX_CAT / MAX_NUM;
+
+  const availablePx = PAGE_WIDTH_PX - PAD_PX * 2 - GAP_PX;
+  const canvas = fitLabelFontSizes._canvas || (fitLabelFontSizes._canvas = document.createElement('canvas'));
+  const ctx = canvas.getContext('2d');
+  const upperName = catName.toUpperCase();
+
+  function widthAt(catPx, numPx) {
+    ctx.font = `800 ${catPx}px Arial`;
+    // canvas measureText doesn't know about CSS letter-spacing, so add a small
+    // estimate for it (matches the .02em letter-spacing set on .pl-cat)
+    const catW = ctx.measureText(upperName).width + upperName.length * (catPx * 0.02);
+    ctx.font = `800 ${numPx}px Arial`;
+    const numW = ctx.measureText(numText).width;
+    return catW + numW;
+  }
+
+  let catPx = MAX_CAT;
+  let numPx = MAX_NUM;
+  while (widthAt(catPx, numPx) > availablePx && catPx > MIN_CAT) {
+    catPx -= 0.5;
+    numPx = Math.max(MIN_NUM, catPx / SIZE_RATIO);
+  }
+  return { catPx, numPx };
+}
+
 function printLabel(cat, existingNum) {
   const num = existingNum != null ? existingNum : cat.count + 1;
+  const numText = `#${num}`;
+  const { catPx, numPx } = fitLabelFontSizes(cat.name, numText);
   printArea.innerHTML = `
     <div class="print-label">
-      <div class="pl-cat">${escapeHtml(cat.name)}</div>
-      <div class="pl-num">#${num}</div>
+      <div class="pl-cat" style="font-size:${catPx}px">${escapeHtml(cat.name)}</div>
+      <div class="pl-num" style="font-size:${numPx}px">${escapeHtml(numText)}</div>
     </div>
   `;
   window.print();
